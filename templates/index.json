@@ -1,13 +1,285 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
-  "sections": {},
-  "order": []
+  "sections": {
+    "luxury_hero_banner": {
+      "type": "luxury-hero-banner",
+      "settings": {
+        "desktop_height": "100vh",
+        "heading": "Luxury Redefined",
+        "subheading": "<p>A boutique curating the finest aesthetic silhouettes and quality accessories.</p>",
+        "btn1_label": "Shop Collection",
+        "btn1_link": "shopify://collections/all"
+      }
+    },
+    "trust_badges": {
+      "type": "trust-icons",
+      "blocks": {
+        "badge_1": {
+          "type": "trust_badge",
+          "settings": {
+            "heading": "Free Shipping",
+            "description": "Complimentary express delivery on all orders above $150."
+          }
+        },
+        "badge_2": {
+          "type": "trust_badge",
+          "settings": {
+            "heading": "Secure Payments",
+            "description": "Fully protected online payments via secure SSL portals."
+          }
+        },
+        "badge_3": {
+          "type": "trust_badge",
+          "settings": {
+            "heading": "Premium Quality",
+            "description": "Finest tailored fabrics and hand-crafted attention."
+          }
+        },
+        "badge_4": {
+          "type": "trust_badge",
+          "settings": {
+            "heading": "Easy Returns",
+            "description": "Hassle-free exchanges within 14 calendar days."
+          }
+        }
+      },
+      "block_order": [
+        "badge_1",
+        "badge_2",
+        "badge_3",
+        "badge_4"
+      ],
+      "settings": {
+        "columns_desktop": 4,
+        "content_alignment": "center",
+        "slider_mobile": true
+      }
+    },
+    "category_grid": {
+      "type": "editorial-category-grid",
+      "blocks": {
+        "cat_1": {
+          "type": "category_card",
+          "settings": {
+            "title": "Summer Silhouettes",
+            "button_label": "Explore Collection",
+            "collection": "all"
+          }
+        },
+        "cat_2": {
+          "type": "category_card",
+          "settings": {
+            "title": "Accessories & Bags",
+            "button_label": "Shop Now",
+            "collection": "all"
+          }
+        },
+        "cat_3": {
+          "type": "category_card",
+          "settings": {
+            "title": "Tailored Outerwear",
+            "button_label": "Discover",
+            "collection": "all"
+          }
+        },
+        "cat_4": {
+          "type": "category_card",
+          "settings": {
+            "title": "Minimal Essentials",
+            "button_label": "View All",
+            "collection": "all"
+          }
+        }
+      },
+      "block_order": [
+        "cat_1",
+        "cat_2",
+        "cat_3",
+        "cat_4"
+      ],
+      "settings": {
+        "grid_layout": "masonry",
+        "mobile_layout": "slider",
+        "card_spacing": 20,
+        "border_radius": 8
+      }
+    },
+    "new_arrivals": {
+      "type": "new-arrivals",
+      "settings": {
+        "heading": "New Curations",
+        "collection": "all",
+        "products_to_show": 8,
+        "infinite_loop": true,
+        "autoplay": true,
+        "autoplay_speed": 4000
+      }
+    },
+    "brand_story": {
+      "type": "editorial-brand-story",
+      "settings": {
+        "image_placement": "right",
+        "sticky_image": true,
+        "label": "Heritage Story",
+        "heading": "Crafting Silhouettes of Command",
+        "description": "<p>Designed in our boutique workshop, each garment represents a commitment to structural expression and tailory perfection.</p>",
+        "cta_label": "Read Our Ethos",
+        "cta_link": "shopify://collections/all"
+      }
+    },
+    "featured_collection_tabs": {
+      "type": "featured-collections-tabs",
+      "blocks": {
+        "tab_1": {
+          "type": "collection_tab",
+          "settings": {
+            "collection": "all"
+          }
+        },
+        "tab_2": {
+          "type": "collection_tab",
+          "settings": {
+            "collection": "all"
+          }
+        }
+      },
+      "block_order": [
+        "tab_1",
+        "tab_2"
+      ],
+      "settings": {
+        "heading": "Shop Our Curations",
+        "products_to_show": 8,
+        "card_gap": 20,
+        "card_border_radius": 8
+      }
+    },
+    "shop_the_look": {
+      "type": "shop-the-look",
+      "blocks": {
+        "look_1": {
+          "type": "hotspot",
+          "settings": {
+            "product": "all",
+            "x_pos": 30,
+            "y_pos": 40
+          }
+        },
+        "look_2": {
+          "type": "hotspot",
+          "settings": {
+            "product": "all",
+            "x_pos": 65,
+            "y_pos": 55
+          }
+        }
+      },
+      "block_order": [
+        "look_1",
+        "look_2"
+      ],
+      "settings": {
+        "heading": "Shop The Look"
+      }
+    },
+    "video_banner": {
+      "type": "autoplay-video-banner",
+      "settings": {
+        "video_source": "shopify",
+        "loop_video": true,
+        "mute_video": true,
+        "heading": "Sight In Motion",
+        "subheading": "A visual essay on modern architectural forms.",
+        "cta_label": "Discover Release",
+        "cta_link": "shopify://collections/all"
+      }
+    },
+    "alternating_rows": {
+      "type": "editorial-alternating-rows",
+      "blocks": {
+        "row_1": {
+          "type": "editorial_row",
+          "settings": {
+            "label": "Capsule Collection",
+            "heading": "Modernist Aesthetic",
+            "description": "<p>A curated release of high-contrast silhouettes and hand-tailored materials crafted for pure functionality and aesthetic command.</p>",
+            "signature": "Ashish Sharma",
+            "cta_label": "Shop the Release"
+          }
+        },
+        "row_2": {
+          "type": "editorial_row",
+          "settings": {
+            "label": "Heritage Story",
+            "heading": "Global Craftsmanship",
+            "description": "<p>Finely sourced materials combined with generational tailoring techniques from our design ateliers.</p>",
+            "signature": "Vivikta Design",
+            "cta_label": "Explore Collection"
+          }
+        }
+      },
+      "block_order": [
+        "row_1",
+        "row_2"
+      ],
+      "settings": {
+        "image_aspect_ratio": "portrait",
+        "image_zoom_hover": true,
+        "image_border_radius": 8
+      }
+    },
+    "testimonials": {
+      "type": "testimonials-slider",
+      "blocks": {
+        "review_1": {
+          "type": "testimonial",
+          "settings": {
+            "name": "Elena Rostova",
+            "rating": 5,
+            "review": "The quality of craftsmanship is absolutely unmatched. The attention to detail makes every piece feel like a customized luxury design."
+          }
+        },
+        "review_2": {
+          "type": "testimonial",
+          "settings": {
+            "name": "Marcus Aurelius",
+            "rating": 5,
+            "review": "Excellent customer support and extremely fast global shipping. Highly recommend the tailored collection."
+          }
+        },
+        "review_3": {
+          "type": "testimonial",
+          "settings": {
+            "name": "Aria Vane",
+            "rating": 5,
+            "review": "Incredible fabric weight and structure. Stays true to size and drapes beautifully."
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "settings": {
+        "heading": "Client Testimonials",
+        "cards_per_view": 3,
+        "infinite_loop": true,
+        "pagination_style": "dots",
+        "card_shadow": "subtle",
+        "card_border_radius": 8
+      }
+    }
+  },
+  "order": [
+    "luxury_hero_banner",
+    "trust_badges",
+    "category_grid",
+    "new_arrivals",
+    "brand_story",
+    "featured_collection_tabs",
+    "shop_the_look",
+    "video_banner",
+    "alternating_rows",
+    "testimonials"
+  ]
 }
