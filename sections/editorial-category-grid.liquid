@@ -310,19 +310,29 @@
         {%- liquid
           assign collection = block.settings.collection
           
-          # Compute image
+          comment
+            Compute image
+          endcomment
           assign grid_image = block.settings.image_override | default: collection.featured_image
           
-          # Compute title
+          comment
+            Compute title
+          endcomment
           assign grid_title = block.settings.title_override | default: collection.title | default: "Featured Category"
           
-          # Compute description
+          comment
+            Compute description
+          endcomment
           assign grid_desc = block.settings.description_override | default: collection.description | strip_html | truncatewords: 25
           
-          # Compute URL
+          comment
+            Compute URL
+          endcomment
           assign grid_url = collection.url | default: "#"
           
-          # Compute reveal delay
+          comment
+            Compute reveal delay
+          endcomment
           assign delay = forloop.index0 | times: 120
         -%}
         

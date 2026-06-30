@@ -1,7 +1,9 @@
 {%- liquid
   assign limit = section.settings.products_to_show
   
-  # Find initial collection
+  comment
+    Find initial collection
+  endcomment
   assign initial_collection = nil
   for block in section.blocks
     if block.settings.collection != blank
@@ -10,9 +12,11 @@
     endif
   endfor
 
-  # If section rendering request is active, we might have a query parameter for collection!
-  # But native section rendering API renders the section in the collection page context.
-  # So if collection is defined in context (e.g. on /collections/handle), liquid uses that collection!
+  comment
+    If section rendering request is active, we might have a query parameter for collection!
+    But native section rendering API renders the section in the collection page context.
+    So if collection is defined in context (e.g. on /collections/handle), liquid uses that collection!
+  endcomment
   assign active_collection = collection | default: initial_collection
   assign products = active_collection.products
   assign total_products = products.size | at_most: limit

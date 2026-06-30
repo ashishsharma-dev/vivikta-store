@@ -4,13 +4,17 @@
   assign products = collection.products
   assign total_products = products.size | at_most: limit
 
-  # Determine if slider should loop
+  comment
+    Determine if slider should loop
+  endcomment
   assign should_loop = false
   if section.settings.infinite_loop and total_products > 4
     assign should_loop = true
   endif
 
-  # Clones count
+  comment
+    Clones count
+  endcomment
   assign clones_count = 4
 -%}
 
