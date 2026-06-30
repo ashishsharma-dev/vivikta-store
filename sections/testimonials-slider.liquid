@@ -1,0 +1,928 @@
+{%- liquid
+  assign limit = section.blocks.size
+  assign total_blocks = section.blocks.size
+  assign should_loop = false
+  if section.settings.infinite_loop and total_blocks > 3
+    assign should_loop = true
+  endif
+
+  # Clones count
+  assign clones_count = 3
+-%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  #Testimonials-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    --text-color: {{ section.settings.text_color }};
+    --card-bg: {{ section.settings.card_bg }};
+    --card-gap: {{ section.settings.card_gap }}px;
+    --border-radius: {{ section.settings.card_border_radius }}px;
+    
+    /* Dynamic Shadow settings */
+    {% if section.settings.card_shadow == 'subtle' %}
+      --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    {% elsif section.settings.card_shadow == 'luxury' %}
+      --card-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    {% else %}
+      --card-shadow: none;
+    {% endif %}
+  }
+
+  .testimonials {
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    color: var(--text-color);
+  }
+
+  .testimonials__header {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .testimonials__heading {
+    margin: 0;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Slider Structure */
+  .testimonials-slider {
+    position: relative;
+    width: 100%;
+  }
+
+  .testimonials-slider__viewport {
+    overflow: hidden;
+    width: 100%;
+    cursor: grab;
+  }
+
+  .testimonials-slider__viewport:active {
+    cursor: grabbing;
+  }
+
+  .testimonials-slider__track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+  }
+
+  .testimonials__slide {
+    flex: 0 0 100%; /* Mobile: 1 card visible */
+    box-sizing: border-box;
+    padding: 0 calc(var(--card-gap) / 2);
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .testimonials__slide {
+      flex: 0 0 50%; /* Tablet: 2 cards visible */
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .testimonials__slide {
+      flex: 0 0 calc(100% / {{ section.settings.cards_per_view }}); /* Desktop: Dynamic density */
+    }
+  }
+
+  /* Testimonial Card Styling */
+  .testimonials__card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 35px;
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    position: relative;
+  }
+
+  @media screen and (max-width: 749px) {
+    .testimonials__card {
+      padding: 25px 20px;
+    }
+  }
+
+  /* Customer Details row */
+  .testimonials__profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: auto;
+    padding-top: 25px;
+  }
+
+  .testimonials__avatar-wrapper {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f7f7f7;
+    flex-shrink: 0;
+  }
+
+  .testimonials__avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Video Badge Overlay on Avatar */
+  .testimonials__avatar-video-btn {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  .testimonials__avatar-wrapper:hover .testimonials__avatar-video-btn {
+    opacity: 1;
+  }
+
+  .testimonials__avatar-video-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    margin-left: 2px;
+  }
+
+  /* Ratings */
+  .testimonials__rating {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+
+  .testimonials__rating svg {
+    width: 16px;
+    height: 16px;
+    fill: #ffb800;
+  }
+
+  /* Review Text */
+  .testimonials__text {
+    font-size: 15px;
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 25px;
+    font-style: italic;
+  }
+
+  .testimonials__name {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0;
+  }
+
+  /* Navigation & Pagination Controls */
+  .testimonials__nav-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .testimonials__arrow {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s;
+    color: inherit;
+  }
+
+  .testimonials__arrow:hover {
+    border-color: var(--text-color);
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .testimonials__arrow svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  .testimonials-slider__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 35px;
+  }
+
+  .testimonials-slider__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.15);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+  }
+
+  .testimonials-slider__dot.is-active {
+    background-color: var(--text-color);
+    transform: scale(1.3);
+  }
+
+  /* Fraction Pagination */
+  .testimonials__fraction {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    margin-top: 35px;
+    text-align: center;
+  }
+
+  /* Modal Dialog review */
+  .testimonials__modal {
+    border: none;
+    background: transparent;
+    padding: 0;
+    max-width: 640px;
+    width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    overflow: visible;
+    outline: none;
+  }
+
+  .testimonials__modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .testimonials__modal-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background-color: #000000;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .testimonials__modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #ffffff;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    z-index: 50;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+
+  .testimonials__modal-close:hover {
+    background: rgba(0,0,0,0.8);
+  }
+
+  .testimonials__modal-video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+{%- endstyle -%}
+
+<div id="Testimonials-{{ section.id }}" class="testimonials section-{{ section.id }}-padding">
+  <div class="page-width">
+    
+    <div class="testimonials__header">
+      <div>
+        {%- if section.settings.heading != blank -%}
+          <h2 class="testimonials__heading">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.show_arrows and total_blocks > 1 -%}
+        <div class="testimonials__nav-wrapper">
+          <button class="testimonials__arrow testimonials__arrow--prev" aria-label="Previous slide">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <button class="testimonials__arrow testimonials__arrow--next" aria-label="Next slide">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </button>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <luxury-testimonials class="testimonials-slider"
+                         data-infinite="{{ section.settings.infinite_loop }}"
+                         data-autoplay="{{ section.settings.autoplay }}"
+                         data-autoplay-speed="{{ section.settings.autoplay_speed }}"
+                         data-total-blocks="{{ total_blocks }}">
+      
+      <div class="testimonials-slider__viewport">
+        <div class="testimonials-slider__track">
+          
+          {%- if total_blocks > 0 -%}
+            
+            {%- comment -%} Prepend Clones {%- endcomment -%}
+            {%- if should_loop -%}
+              {%- for block in section.blocks limit: clones_count offset: total_blocks | minus: clones_count -%}
+                <div class="testimonials__slide cloned">
+                  {% render 'testimonial-card-item', block: block %}
+                </div>
+              {%- endfor -%}
+            {%- endif -%}
+
+            {%- comment -%} Original Slides {%- endcomment -%}
+            {%- for block in section.blocks -%}
+              <div class="testimonials__slide" {{ block.shopify_attributes }}>
+                {% render 'testimonial-card-item', block: block %}
+              </div>
+            {%- endfor -%}
+
+            {%- comment -%} Append Clones {%- endcomment -%}
+            {%- if should_loop -%}
+              {%- for block in section.blocks limit: clones_count -%}
+                <div class="testimonials__slide cloned">
+                  {% render 'testimonial-card-item', block: block %}
+                </div>
+              {%- endfor -%}
+            {%- endif -%}
+
+          {%- else -%}
+            {%- comment -%} Placeholder layout {%- endcomment -%}
+            {%- for i in (1..3) -%}
+              <div class="testimonials__slide">
+                <div class="testimonials__card">
+                  <div class="testimonials__rating">
+                    {%- for j in (1..5) -%}<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>{%- endfor -%}
+                  </div>
+                  <div class="testimonials__text">
+                    "This is an exemplary testimonial layout showing the high quality design typography you can expect."
+                  </div>
+                  <div class="testimonials__profile">
+                    <div class="testimonials__avatar-wrapper">
+                      {{ 'image' | placeholder_svg_tag: 'testimonials__avatar placeholder-svg' }}
+                    </div>
+                    <div>
+                      <h4 class="testimonials__name">John Doe</h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+
+        </div>
+      </div>
+
+      {%- comment -%} Pagination Indicators {%- endcomment -%}
+      {%- if total_blocks > 1 -%}
+        {%- if section.settings.pagination_style == 'dots' -%}
+          <div class="testimonials-slider__dots"></div>
+        {%- elsif section.settings.pagination_style == 'fraction' -%}
+          <div class="testimonials__fraction"></div>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- comment -%} Video Modals Dialog overlay {%- endcomment -%}
+      {%- for block in section.blocks -%}
+        {%- assign video_url = block.settings.video_url | default: block.settings.shopify_video.sources[0].url -%}
+        {%- if video_url != blank -%}
+          <dialog class="testimonials__modal" id="TestimonialModal-{{ block.id }}">
+            <div class="testimonials__modal-box">
+              <button class="testimonials__modal-close" data-close-modal="TestimonialModal-{{ block.id }}">Close</button>
+              <video class="testimonials__modal-video" controls playsinline>
+                <source src="{{ video_url }}" type="video/mp4">
+              </video>
+            </div>
+          </dialog>
+        {%- endif -%}
+      {%- endfor -%}
+
+    </luxury-testimonials>
+
+  </div>
+</div>
+
+<script>
+  if (!customElements.get('luxury-testimonials')) {
+    customElements.define('luxury-testimonials', class LuxuryTestimonials extends HTMLElement {
+      constructor() {
+        super();
+        this.track = null;
+        this.viewport = null;
+        this.slides = [];
+        this.btnPrev = null;
+        this.btnNext = null;
+        this.dotsContainer = null;
+        this.fractionContainer = null;
+
+        this.infinite = false;
+        this.autoplay = false;
+        this.autoplaySpeed = 3000;
+        this.totalOriginal = 0;
+        this.totalSlides = 0;
+        this.visibleSlides = 3;
+
+        this.currentIndex = 0;
+        this.startIndex = 0;
+        this.autoplayTimer = null;
+
+        // Touch drag variables
+        this.isDragging = false;
+        this.startX = 0;
+        this.currentTranslate = 0;
+        this.prevTranslate = 0;
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.testimonials-slider__track');
+        this.viewport = this.querySelector('.testimonials-slider__viewport');
+        this.slides = Array.from(this.track.querySelectorAll('.testimonials__slide'));
+        this.btnPrev = this.parentElement.querySelector('.testimonials__arrow--prev');
+        this.btnNext = this.parentElement.querySelector('.testimonials__arrow--next');
+        this.dotsContainer = this.querySelector('.testimonials-slider__dots');
+        this.fractionContainer = this.querySelector('.testimonials__fraction');
+
+        this.infinite = this.dataset.infinite === 'true';
+        this.autoplay = this.dataset.autoplay === 'true';
+        this.autoplaySpeed = parseInt(this.dataset.autoplaySpeed) || 3000;
+        this.totalOriginal = parseInt(this.dataset.totalBlocks) || 0;
+        this.totalSlides = this.slides.length;
+
+        if (this.totalSlides === 0 || this.totalOriginal === 0) return;
+
+        this.updateVisibleSlidesCount();
+        this.initSlider();
+        this.initVideoModals();
+      }
+
+      disconnectedCallback() {
+        this.stopAutoplay();
+        window.removeEventListener('resize', this.resizeHandler);
+      }
+
+      updateVisibleSlidesCount() {
+        const width = window.innerWidth;
+        if (width >= 990) {
+          this.visibleSlides = {{ section.settings.cards_per_view }};
+        } else if (width >= 750) {
+          this.visibleSlides = 2;
+        } else {
+          this.visibleSlides = 1;
+        }
+      }
+
+      initSlider() {
+        this.startIndex = this.infinite && this.totalOriginal > 3 ? 3 : 0;
+        this.currentIndex = this.startIndex;
+
+        this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+
+        this.initEvents();
+        this.initDots();
+        this.updatePagination();
+        this.startAutoplay();
+      }
+
+      initEvents() {
+        if (this.btnPrev) this.btnPrev.addEventListener('click', () => this.slidePrev());
+        if (this.btnNext) this.btnNext.addEventListener('click', () => this.slideNext());
+
+        this.viewport.addEventListener('mousedown', (e) => this.dragStart(e));
+        this.viewport.addEventListener('mousemove', (e) => this.dragMove(e));
+        this.viewport.addEventListener('mouseup', () => this.dragEnd());
+        this.viewport.addEventListener('mouseleave', () => { if (this.isDragging) this.dragEnd(); });
+
+        this.viewport.addEventListener('touchstart', (e) => this.dragStart(e), { passive: true });
+        this.viewport.addEventListener('touchmove', (e) => this.dragMove(e), { passive: true });
+        this.viewport.addEventListener('touchend', () => this.dragEnd());
+
+        this.track.addEventListener('transitionend', () => this.handleTransitionEnd());
+
+        this.resizeHandler = () => {
+          this.updateVisibleSlidesCount();
+          this.disableTransition();
+          this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+        };
+        window.addEventListener('resize', this.resizeHandler);
+
+        // Pause autoplay on mouse hover
+        this.addEventListener('mouseenter', () => this.stopAutoplay());
+        this.addEventListener('mouseleave', () => this.startAutoplay());
+      }
+
+      getSlideWidth() {
+        return this.slides[0].offsetWidth;
+      }
+
+      setTrackPosition(translate) {
+        this.currentTranslate = translate;
+        this.track.style.transform = `translate3d(${translate}px, 0, 0)`;
+      }
+
+      enableTransition() {
+        this.track.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+      }
+
+      disableTransition() {
+        this.track.style.transition = 'none';
+      }
+
+      slideNext() {
+        this.currentIndex++;
+        this.enableTransition();
+        this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+        this.updatePagination();
+      }
+
+      slidePrev() {
+        this.currentIndex--;
+        this.enableTransition();
+        this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+        this.updatePagination();
+      }
+
+      handleTransitionEnd() {
+        if (!this.infinite || this.totalOriginal <= 3) return;
+
+        if (this.currentIndex >= this.startIndex + this.totalOriginal) {
+          this.disableTransition();
+          this.currentIndex = this.currentIndex - this.totalOriginal;
+          this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+        } else if (this.currentIndex < this.startIndex) {
+          this.disableTransition();
+          this.currentIndex = this.currentIndex + this.totalOriginal;
+          this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+        }
+      }
+
+      dragStart(e) {
+        this.isDragging = true;
+        this.startX = e.clientX || e.touches[0].clientX;
+        this.prevTranslate = -this.currentIndex * this.getSlideWidth();
+        this.disableTransition();
+      }
+
+      dragMove(e) {
+        if (!this.isDragging) return;
+        const currentX = e.clientX || (e.touches && e.touches[0].clientX);
+        const deltaX = currentX - this.startX;
+        this.setTrackPosition(this.prevTranslate + deltaX);
+      }
+
+      dragEnd() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+        const dragDistance = this.currentTranslate - this.prevTranslate;
+
+        if (dragDistance < -60) {
+          this.slideNext();
+        } else if (dragDistance > 60) {
+          this.slidePrev();
+        } else {
+          this.enableTransition();
+          this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+        }
+      }
+
+      startAutoplay() {
+        if (!this.autoplay) return;
+        this.stopAutoplay();
+        this.autoplayTimer = setInterval(() => {
+          this.slideNext();
+        }, this.autoplaySpeed);
+      }
+
+      stopAutoplay() {
+        if (this.autoplayTimer) {
+          clearInterval(this.autoplayTimer);
+          this.autoplayTimer = null;
+        }
+      }
+
+      initDots() {
+        if (!this.dotsContainer) return;
+        this.dotsContainer.innerHTML = '';
+        for (let i = 0; i < this.totalOriginal; i++) {
+          const dot = document.createElement('button');
+          dot.className = 'testimonials-slider__dot';
+          dot.ariaLabel = `Go to slide ${i + 1}`;
+          dot.addEventListener('click', () => {
+            this.currentIndex = this.startIndex + i;
+            this.enableTransition();
+            this.setTrackPosition(-this.currentIndex * this.getSlideWidth());
+            this.updatePagination();
+          });
+          this.dotsContainer.appendChild(dot);
+        }
+      }
+
+      updatePagination() {
+        let relativeIndex = (this.currentIndex - this.startIndex) % this.totalOriginal;
+        if (relativeIndex < 0) relativeIndex += this.totalOriginal;
+
+        // Dots
+        if (this.dotsContainer) {
+          const dots = this.dotsContainer.querySelectorAll('.testimonials-slider__dot');
+          dots.forEach(dot => dot.classList.remove('is-active'));
+          if (dots[relativeIndex]) dots[relativeIndex].classList.add('is-active');
+        }
+
+        // Fraction
+        if (this.fractionContainer) {
+          const current = (relativeIndex + 1).toString().padStart(2, '0');
+          const total = this.totalOriginal.toString().padStart(2, '0');
+          this.fractionContainer.textContent = `${current} / ${total}`;
+        }
+      }
+
+      // Dialog review modals playback handling
+      initVideoModals() {
+        this.querySelectorAll('.testimonials__avatar-video-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const modalId = btn.dataset.openModal;
+            const modal = document.getElementById(modalId);
+            if (modal) {
+              modal.showModal();
+              const video = modal.querySelector('video');
+              if (video) {
+                video.play();
+              }
+            }
+          });
+        });
+
+        this.querySelectorAll('.testimonials__modal-close').forEach(closeBtn => {
+          closeBtn.addEventListener('click', () => {
+            const modalId = closeBtn.dataset.closeModal;
+            const modal = document.getElementById(modalId);
+            if (modal) {
+              const video = modal.querySelector('video');
+              if (video) {
+                video.pause();
+              }
+              modal.close();
+            }
+          });
+        });
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Luxury Testimonials",
+  "tag": "section",
+  "class": "section section-testimonials",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Client Testimonials"
+    },
+    {
+      "type": "header",
+      "content": "Slider Configuration"
+    },
+    {
+      "type": "range",
+      "id": "cards_per_view",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "label": "Cards Per View (Desktop)",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "infinite_loop",
+      "label": "Enable Infinite Loop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable Autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 2000,
+      "max": 8000,
+      "step": 500,
+      "unit": "ms",
+      "label": "Autoplay Speed",
+      "default": 4000
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show Navigation Arrows",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "pagination_style",
+      "label": "Pagination Indicator Style",
+      "options": [
+        { "value": "dots", "label": "Dots" },
+        { "value": "fraction", "label": "Editorial Fraction (E.g. 01 / 04)" },
+        { "value": "none", "label": "Hide Pagination" }
+      ],
+      "default": "dots"
+    },
+    {
+      "type": "header",
+      "content": "Card Styling"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "card_shadow",
+      "label": "Card Shadows Style",
+      "options": [
+        { "value": "none", "label": "No Shadow" },
+        { "value": "subtle", "label": "Subtle Shadow" },
+        { "value": "luxury", "label": "Luxury Diffuse Shadow" }
+      ],
+      "default": "subtle"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Spacing (Gap)",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Colors & Padding"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background Color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color (Ratings/Play buttons)",
+      "default": "#9d8461"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial Block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Customer Portrait Image"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Customer Name",
+          "default": "Sophia Loren"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "label": "Rating Score (Stars)",
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "review",
+          "label": "Review Quote Text",
+          "default": "The quality of craftsmanship is absolutely unmatched. The attention to detail makes every piece feel like a customized luxury design."
+        },
+        {
+          "type": "header",
+          "content": "Video Review (Optional)"
+        },
+        {
+          "type": "video",
+          "id": "shopify_video",
+          "label": "Shopify Hosted Video"
+        },
+        {
+          "type": "text",
+          "id": "video_url",
+          "label": "Or Raw Video URL (Fallback MP4)",
+          "info": "Paste a link to an uploaded MP4 file if not using Shopify Hosted Video setting above."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Luxury Testimonials",
+      "blocks": [
+        { "type": "testimonial", "settings": { "name": "Elena Rostova" } },
+        { "type": "testimonial", "settings": { "name": "Marcus Aurelius" } },
+        { "type": "testimonial", "settings": { "name": "Aria Vane" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

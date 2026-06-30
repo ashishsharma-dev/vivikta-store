@@ -1,0 +1,43 @@
+{%- liquid
+  assign video_url = block.settings.video_url | default: block.settings.shopify_video.sources[0].url
+  assign has_video = false
+  if video_url != blank
+    assign has_video = true
+  endif
+-%}
+
+<div class="testimonials__card">
+  {%- comment -%} Rating Stars {%- endcomment -%}
+  <div class="testimonials__rating" aria-label="{{ block.settings.rating }} stars out of 5">
+    {%- for i in (1..block.settings.rating) -%}
+      <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    {%- endfor -%}
+  </div>
+
+  {%- comment -%} Testimonial Quote {%- endcomment -%}
+  <div class="testimonials__text">
+    "{{ block.settings.review }}"
+  </div>
+
+  {%- comment -%} Customer Profile Info {%- endcomment -%}
+  <div class="testimonials__profile">
+    <div class="testimonials__avatar-wrapper">
+      {%- if block.settings.image != blank -%}
+        {{ block.settings.image | image_url: width: 100, height: 100, crop: 'center' | image_tag: loading: 'lazy', class: 'testimonials__avatar', alt: block.settings.name }}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'testimonials__avatar placeholder-svg' }}
+      {%- endif -%}
+
+      {%- comment -%} Video play badge overlay {%- endcomment -%}
+      {%- if has_video -%}
+        <button class="testimonials__avatar-video-btn" aria-label="Play video review" data-open-modal="TestimonialModal-{{ block.id }}">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      {%- endif -%}
+    </div>
+    
+    <div>
+      <h4 class="testimonials__name">{{ block.settings.name }}</h4>
+    </div>
+  </div>
+</div>
