@@ -1,0 +1,829 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  #ShopLook-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    --accent-color: {{ section.settings.accent_color }};
+    --marker-color: {{ section.settings.marker_color }};
+    --text-color: {{ section.settings.text_color }};
+  }
+
+  .shop-look {
+    width: 100%;
+    box-sizing: border-box;
+    color: var(--text-color);
+  }
+
+  .shop-look__header {
+    margin-bottom: 35px;
+    text-align: center;
+  }
+
+  .shop-look__heading {
+    margin: 0;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Editorial Image wrapper */
+  .shop-look__container {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+    border-radius: {{ section.settings.border_radius }}px;
+  }
+
+  .shop-look__media {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: {{ section.settings.border_radius }}px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  }
+
+  .shop-look__image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  /* Hotspots Mapping */
+  .shop-look__hotspot-wrapper {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+  }
+
+  /* When drag-and-drop assist is running */
+  .shop-look__hotspot-wrapper.is-dragging-assist {
+    cursor: move;
+  }
+
+  .shop-look__hotspot {
+    background-color: var(--marker-color);
+    border: 2px solid #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+    outline: none;
+    z-index: 2;
+  }
+
+  .shop-look__hotspot-wrapper:hover .shop-look__hotspot,
+  .shop-look__hotspot-wrapper.is-active .shop-look__hotspot {
+    transform: scale(1.15);
+    background-color: var(--accent-color);
+  }
+
+  /* Pulsing Ring Animation */
+  .hotspot-pulse {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+    opacity: 0.8;
+    pointer-events: none;
+    animation: hotspot-pulse-ring 2.2s infinite ease-out;
+    z-index: 1;
+  }
+
+  @keyframes hotspot-pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(2.8);
+      opacity: 0;
+    }
+  }
+
+  /* Desktop Product Popup */
+  .shop-look__popup {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: #ffffff;
+    border-radius: 6px;
+    width: 240px;
+    padding: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Popup Triangle arrow */
+  .shop-look__popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #ffffff transparent transparent transparent;
+  }
+
+  /* Show popup on hover/active on Desktop */
+  @media screen and (min-width: 750px) {
+    .shop-look__hotspot-wrapper:hover .shop-look__popup,
+    .shop-look__hotspot-wrapper.is-active .shop-look__popup {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  .shop-look__popup-link {
+    display: flex;
+    gap: 12px;
+    text-decoration: none;
+    color: #121212;
+  }
+
+  .shop-look__popup-image {
+    width: 60px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: #f7f7f7;
+  }
+
+  .shop-look__popup-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .shop-look__popup-title {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shop-look__popup-price {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .shop-look__popup-price-compare {
+    text-decoration: line-through;
+    opacity: 0.5;
+    font-weight: 400;
+  }
+
+  /* Add to Cart inside Popup */
+  .shop-look__popup-add-btn {
+    width: 100%;
+    background-color: #121212;
+    color: #ffffff;
+    border: none;
+    padding: 8px 15px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background-color 0.3s;
+  }
+
+  .shop-look__popup-add-btn:hover {
+    background-color: #333333;
+  }
+
+  /* Coordinates Drag Assist Tooltip */
+  .shop-look__drag-tooltip {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #121212;
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  /* Mobile Bottom Drawer */
+  .shop-look__backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .shop-look__backdrop.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .shop-look__mobile-drawers {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .shop-look__drawer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 12px 12px 0 0;
+    padding: 25px 20px;
+    box-sizing: border-box;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .shop-look__drawer.is-active {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .shop-look__drawer-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+  }
+
+  .shop-look__drawer-close svg {
+    width: 20px;
+    height: 20px;
+    fill: #121212;
+  }
+
+  .shop-look__drawer-content {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .shop-look__drawer-image {
+    width: 80px;
+    height: 105px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: #f7f7f7;
+  }
+
+  .shop-look__drawer-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 8px;
+  }
+
+  .shop-look__drawer-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .shop-look__drawer-price {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .shop-look__drawer-price-compare {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  .shop-look__drawer-add-btn {
+    background-color: #121212;
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background-color 0.3s;
+  }
+
+  /* Spinner */
+  .luxury-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: luxury-spin 0.6s linear infinite;
+  }
+
+  @keyframes luxury-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+{%- endstyle -%}
+
+<div id="ShopLook-{{ section.id }}" class="shop-look section-{{ section.id }}-padding">
+  <div class="page-width">
+    
+    {%- if section.settings.heading != blank -%}
+      <div class="shop-look__header">
+        <h2 class="shop-look__heading">{{ section.settings.heading }}</h2>
+      </div>
+    {%- endif -%}
+
+    <shop-the-look class="shop-look__container" data-section-id="{{ section.id }}">
+      <div class="shop-look__media">
+        {%- if section.settings.image != blank -%}
+          {{ section.settings.image | image_url: width: 2000 | image_tag: 
+            loading: 'lazy', 
+            class: 'shop-look__image', 
+            widths: '375, 550, 750, 990, 1200, 1500, 2000', 
+            alt: section.settings.heading 
+          }}
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'shop-look__image placeholder-svg' }}
+        {%- endif -%}
+
+        {%- comment -%} Hotspots Overlay Loop {%- endcomment -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.product != blank -%}
+            {%- assign product = block.settings.product -%}
+            {%- assign current_variant = product.selected_or_first_available_variant -%}
+            
+            <div 
+              class="shop-look__hotspot-wrapper" 
+              style="top: {{ block.settings.y_pos }}%; left: {{ block.settings.x_pos }}%;" 
+              data-block-id="{{ block.id }}" 
+              data-x="{{ block.settings.x_pos }}" 
+              data-y="{{ block.settings.y_pos }}"
+              {{ block.shopify_attributes }}
+            >
+              <button class="shop-look__hotspot" aria-label="View product {{ product.title | escape }}">
+                <span class="hotspot-pulse"></span>
+              </button>
+
+              {%- comment -%} Desktop Card Popup {%- endcomment -%}
+              <div class="shop-look__popup">
+                <a href="{{ product.url }}" class="shop-look__popup-link">
+                  {{ product.featured_media | image_url: width: 150 | image_tag: loading: 'lazy', class: 'shop-look__popup-image', alt: product.title }}
+                  <div class="shop-look__popup-info">
+                    <h4 class="shop-look__popup-title">{{ product.title }}</h4>
+                    <div class="shop-look__popup-price">
+                      <span class="shop-look__popup-price-current">{{ product.price | money }}</span>
+                      {%- if product.compare_at_price > product.price -%}
+                        <span class="shop-look__popup-price-compare">{{ product.compare_at_price | money }}</span>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </a>
+                <button class="shop-look__popup-add-btn" data-variant-id="{{ current_variant.id }}">
+                  <span>Add to Cart</span>
+                  <div class="luxury-spinner hidden"></div>
+                </button>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {%- comment -%} Mobile Backdrop Overlay {%- endcomment -%}
+      <div class="shop-look__backdrop"></div>
+
+      {%- comment -%} Mobile Bottom Drawers {%- endcomment -%}
+      <div class="shop-look__mobile-drawers">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.product != blank -%}
+            {%- assign product = block.settings.product -%}
+            {%- assign current_variant = product.selected_or_first_available_variant -%}
+            
+            <div class="shop-look__drawer" data-block-id="{{ block.id }}">
+              <button class="shop-look__drawer-close" aria-label="Close drawer">
+                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              </button>
+              <div class="shop-look__drawer-content">
+                {{ product.featured_media | image_url: width: 200 | image_tag: loading: 'lazy', class: 'shop-look__drawer-image', alt: product.title }}
+                <div class="shop-look__drawer-info">
+                  <h4 class="shop-look__drawer-title">{{ product.title }}</h4>
+                  <div class="shop-look__drawer-price">
+                    <span class="shop-look__drawer-price-current">{{ product.price | money }}</span>
+                    {%- if product.compare_at_price > product.price -%}
+                      <span class="shop-look__drawer-price-compare">{{ product.compare_at_price | money }}</span>
+                    {%- endif -%}
+                  </div>
+                  <button class="shop-look__drawer-add-btn" data-variant-id="{{ current_variant.id }}">
+                    <span>Add to Cart</span>
+                    <div class="luxury-spinner hidden"></div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </shop-the-look>
+
+  </div>
+</div>
+
+<script>
+  if (!customElements.get('shop-the-look')) {
+    customElements.define('shop-the-look', class ShopTheLook extends HTMLElement {
+      constructor() {
+        super();
+        this.backdrop = null;
+        this.drawers = [];
+        this.wrappers = [];
+      }
+
+      connectedCallback() {
+        this.backdrop = this.querySelector('.shop-look__backdrop');
+        this.drawers = Array.from(this.querySelectorAll('.shop-look__drawer'));
+        this.wrappers = Array.from(this.querySelectorAll('.shop-look__hotspot-wrapper'));
+
+        this.initEvents();
+
+        // Visual Coordinates Drag-and-Drop Assist Tool (Active ONLY in Shopify Editor)
+        if (window.ShopifyDesignMode) {
+          this.initDragCoordinateAssist();
+        }
+      }
+
+      initEvents() {
+        this.wrappers.forEach(wrapper => {
+          const btn = wrapper.querySelector('.shop-look__hotspot');
+          const blockId = wrapper.dataset.blockId;
+
+          // Click behavior (primarily for Mobile, fallback for Desktop)
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (window.innerWidth < 750) {
+              this.openMobileDrawer(blockId);
+            } else {
+              // On desktop, toggle active class (helps if hover isn't preferred)
+              const wasActive = wrapper.classList.contains('is-active');
+              this.wrappers.forEach(w => w.classList.remove('is-active'));
+              if (!wasActive) wrapper.classList.add('is-active');
+            }
+          });
+        });
+
+        // Close Mobile Drawers on backdrop click
+        if (this.backdrop) {
+          this.backdrop.addEventListener('click', () => this.closeMobileDrawers());
+        }
+
+        this.querySelectorAll('.shop-look__drawer-close').forEach(closeBtn => {
+          closeBtn.addEventListener('click', () => this.closeMobileDrawers());
+        });
+
+        // Click outside desktop popup closes active popups
+        document.addEventListener('click', () => {
+          this.wrappers.forEach(w => w.classList.remove('is-active'));
+        });
+
+        // AJAX Quick Add to Cart
+        this.querySelectorAll('.shop-look__popup-add-btn, .shop-look__drawer-add-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.handleAddToCart(btn);
+          });
+        });
+      }
+
+      openMobileDrawer(blockId) {
+        this.closeMobileDrawers();
+        this.backdrop.classList.add('is-active');
+        const drawer = this.querySelector(`.shop-look__drawer[data-block-id="${blockId}"]`);
+        if (drawer) drawer.classList.add('is-active');
+      }
+
+      closeMobileDrawers() {
+        if (this.backdrop) this.backdrop.classList.remove('is-active');
+        this.drawers.forEach(d => d.classList.remove('is-active'));
+      }
+
+      handleAddToCart(btn) {
+        const variantId = btn.dataset.variantId;
+        const spinner = btn.querySelector('.luxury-spinner');
+        const label = btn.querySelector('span');
+
+        if (!variantId) return;
+
+        if (spinner) spinner.classList.remove('hidden');
+        if (label) label.textContent = 'Adding...';
+        btn.disabled = true;
+
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to add');
+          return response.json();
+        })
+        .then(data => {
+          document.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart: data } }));
+          const cartDrawer = document.querySelector('cart-drawer');
+          if (cartDrawer && typeof cartDrawer.renderContents === 'function') {
+            cartDrawer.renderContents(data);
+          } else {
+            const cartNotification = document.querySelector('cart-notification');
+            if (cartNotification && typeof cartNotification.renderContents === 'function') {
+              cartNotification.renderContents(data);
+            } else {
+              fetch('/cart.js')
+                .then(res => res.json())
+                .then(cart => {
+                  const bubbles = document.querySelectorAll('.cart-count-bubble span:first-child');
+                  bubbles.forEach(b => b.textContent = cart.item_count);
+                  const wrappers = document.querySelectorAll('.cart-count-bubble');
+                  wrappers.forEach(w => w.classList.remove('hidden'));
+                });
+            }
+          }
+          if (label) label.textContent = 'Added!';
+          setTimeout(() => {
+            if (label) label.textContent = btn.classList.contains('shop-look__popup-add-btn') ? 'Add' : 'Add to Cart';
+            btn.disabled = false;
+          }, 2000);
+        })
+        .catch(error => {
+          console.error(error);
+          if (label) label.textContent = 'Error';
+          setTimeout(() => {
+            if (label) label.textContent = btn.classList.contains('shop-look__popup-add-btn') ? 'Add' : 'Add to Cart';
+            btn.disabled = false;
+          }, 2000);
+        })
+        .finally(() => {
+          if (spinner) spinner.classList.add('hidden');
+        });
+      }
+
+      // Coordinates visual drag helper
+      initDragCoordinateAssist() {
+        const mediaBox = this.querySelector('.shop-look__media');
+        
+        this.wrappers.forEach(wrapper => {
+          wrapper.classList.add('is-dragging-assist');
+          let isDragging = false;
+          let dragTooltip = null;
+
+          const onMouseDown = (e) => {
+            e.preventDefault();
+            isDragging = true;
+
+            // Create coordinate tooltip
+            dragTooltip = document.createElement('div');
+            dragTooltip.className = 'shop-look__drag-tooltip';
+            wrapper.appendChild(dragTooltip);
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          };
+
+          const onMouseMove = (e) => {
+            if (!isDragging) return;
+            const rect = mediaBox.getBoundingClientRect();
+            
+            let x = ((e.clientX - rect.left) / rect.width) * 100;
+            let y = ((e.clientY - rect.top) / rect.height) * 100;
+
+            // Constrain 0 to 100
+            x = Math.max(0, Math.min(100, x));
+            y = Math.max(0, Math.min(100, y));
+
+            wrapper.style.left = `${x.toFixed(1)}%`;
+            wrapper.style.top = `${y.toFixed(1)}%`;
+
+            dragTooltip.textContent = `X: ${x.toFixed(1)}%, Y: ${y.toFixed(1)}%`;
+          };
+
+          const onMouseUp = () => {
+            isDragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+
+            // Display helpful note in console for easy copying
+            const xVal = wrapper.style.left;
+            const yVal = wrapper.style.top;
+            console.log(`%c[Shop The Look coordinate helper]%c Set block settings: X pos: ${parseFloat(xVal).toFixed(0)}, Y pos: ${parseFloat(yVal).toFixed(0)}`, 'color:#9d8461;font-weight:bold;', 'color:default;');
+
+            // Keep coordinate tooltip visible for 4s
+            setTimeout(() => {
+              if (dragTooltip && dragTooltip.parentNode) {
+                dragTooltip.remove();
+              }
+            }, 4000);
+          };
+
+          wrapper.addEventListener('mousedown', onMouseDown);
+        });
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Shop The Look",
+  "tag": "section",
+  "class": "section section-shop-the-look",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop The Look"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Editorial Background Image"
+    },
+    {
+      "type": "header",
+      "content": "Customization styling"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background Color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading Text Color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "marker_color",
+      "label": "Hotspot Dot Background",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Pulsing Ring / Hover Color",
+      "default": "#9d8461"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Corner Radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "hotspot",
+      "name": "Hotspot Marker",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product Target"
+        },
+        {
+          "type": "range",
+          "id": "x_pos",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Hotspot Horizontal Position (X)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "y_pos",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Hotspot Vertical Position (Y)",
+          "default": 50
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop The Look",
+      "blocks": [
+        { "type": "hotspot", "settings": { "x_pos": 30, "y_pos": 40 } },
+        { "type": "hotspot", "settings": { "x_pos": 65, "y_pos": 55 } }
+      ]
+    }
+  ]
+}
+{% endschema %}
