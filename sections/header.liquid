@@ -1,12 +1,7 @@
 <link rel="stylesheet" href="{{ 'component-list-menu.css' | asset_url }}" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="{{ 'component-search.css' | asset_url }}" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="{{ 'component-menu-drawer.css' | asset_url }}" media="print" onload="this.media='all'">
-<link
-  rel="stylesheet"
-  href="{{ 'component-cart-notification.css' | asset_url }}"
-  media="print"
-  onload="this.media='all'"
->
+<link rel="stylesheet" href="{{ 'component-cart-notification.css' | asset_url }}" media="print" onload="this.media='all'">
 
 {%- if settings.predictive_search_enabled -%}
   <link rel="stylesheet" href="{{ 'component-price.css' | asset_url }}" media="print" onload="this.media='all'">
@@ -74,6 +69,139 @@
       padding-top: 0.5rem;
     }
   }
+
+  /* Wishlist Badge */
+  .wishlist-count-bubble {
+    position: absolute;
+    background-color: #121212;
+    color: #ffffff;
+    height: 1.7rem;
+    width: 1.7rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: .9rem;
+    bottom: .8rem;
+    left: 2.2rem;
+    z-index: 1;
+  }
+
+  .header-wrapper.is-sticky .wishlist-count-bubble {
+    background-color: #121212;
+    color: #ffffff;
+  }
+
+  /* Transparent header overlay styling on homepage */
+  .template-index .header-wrapper--transparent:not(.is-sticky) {
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+    background-color: transparent !important;
+    background-image: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    --color-icon: #ffffff;
+    --color-foreground: 255, 255, 255;
+  }
+
+  .template-index .header-wrapper--transparent:not(.is-sticky) .header__menu-item,
+  .template-index .header-wrapper--transparent:not(.is-sticky) .header__icon svg {
+    color: #ffffff !important;
+    fill: none;
+    stroke: #ffffff !important;
+  }
+
+  .template-index .header-wrapper--transparent:not(.is-sticky) .header__active-menu-item {
+    border-bottom-color: #ffffff !important;
+  }
+
+  /* Transition timings */
+  .header-wrapper {
+    transition: background-color 0.4s ease, border-bottom 0.4s ease, box-shadow 0.4s ease, padding 0.4s ease;
+  }
+  .header__menu-item, .header__icon svg {
+    transition: color 0.3s ease, stroke 0.3s ease;
+  }
+
+  /* Sticky header scroll state with glassmorphic backing */
+  .header-wrapper.is-sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    animation: luxury-header-slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes luxury-header-slide-down {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+
+  .header-wrapper.is-sticky .header {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  /* Mega Menu featured columns layout styles */
+  .mega-menu__inner-wrapper {
+    display: flex;
+    gap: 40px;
+  }
+
+  .mega-menu__list {
+    flex-grow: 1;
+  }
+
+  .mega-menu__content--has-featured .mega-menu__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .mega-menu__featured-container {
+    display: flex;
+    gap: 20px;
+    width: 320px;
+    flex-shrink: 0;
+  }
+
+  .mega-menu__featured-card {
+    display: flex;
+    flex-direction: column;
+    width: calc(50% - 10px);
+    text-decoration: none;
+    color: #121212;
+  }
+
+  .mega-menu__featured-image-wrapper {
+    width: 100%;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #f7f7f7;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  }
+
+  .mega-menu__featured-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mega-menu__featured-card:hover .mega-menu__featured-image {
+    transform: scale(1.05);
+  }
+
+  .mega-menu__featured-title {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
 </style>
 
 {%- style -%}
@@ -82,7 +210,7 @@
   }
 
   .section-header {
-    position: sticky; /* This is for fixing a Safari z-index issue. PR #2147 */
+    position: sticky;
     margin-bottom: {{ section.settings.margin_bottom | times: 0.75 | round: 0 }}px;
   }
 
@@ -102,17 +230,8 @@
 
 <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
 
-{%- liquid
-  for block in section.blocks
-    if block.type == '@app'
-      assign has_app_block = true
-    endif
-  endfor
--%}
-
 {% liquid
   assign header_tag = 'div'
-
   if section.settings.sticky_header_type != 'none'
     assign header_tag = 'sticky-header'
   endif
@@ -122,7 +241,7 @@
   {% if header_tag == 'sticky-header' %}
     data-sticky-type="{{ section.settings.sticky_header_type }}"
   {% endif %}
-  class="header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %}"
+  class="header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %}{% if section.settings.enable_transparent_header %} header-wrapper--transparent{% endif %}"
 >
   {%- liquid
     assign social_links = false
@@ -136,7 +255,8 @@
       assign localization_forms = true
     endif
   -%}
-  <header class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if has_app_block %} header--has-app{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
+  
+  <header class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
     {%- liquid
       if section.settings.menu != blank
         render 'header-drawer'
@@ -247,6 +367,7 @@
           </localization-form>
         {%- endif -%}
       </div>
+      
       {% render 'header-search', input_id: 'Search-In-Modal' %}
 
       {%- if shop.customer_accounts_enabled -%}
@@ -278,12 +399,11 @@
         </a>
       {%- endif -%}
 
-      {%- for block in section.blocks -%}
-        {%- case block.type -%}
-          {%- when '@app' -%}
-            {% render block %}
-        {%- endcase -%}
-      {%- endfor -%}
+      {%- comment -%} Wishlist Link and Badge {%- endcomment -%}
+      <a href="/pages/wishlist" class="header__icon header__icon--wishlist link focus-inset" id="wishlist-icon-bubble" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" class="icon icon-wishlist" style="width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.5;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <div class="wishlist-count-bubble hidden"></div>
+      </a>
 
       <a href="{{ routes.cart_url }}" class="header__icon header__icon--cart link focus-inset" id="cart-icon-bubble">
         {% if cart == empty %}
@@ -367,6 +487,16 @@
     onScroll() {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
+      // Premium Transparent transition scroll threshold
+      const headerWrapper = this.querySelector('.header-wrapper');
+      if (headerWrapper) {
+        if (scrollTop > 50) {
+          headerWrapper.classList.add('is-sticky');
+        } else {
+          headerWrapper.classList.remove('is-sticky');
+        }
+      }
+
       if (this.predictiveSearch && this.predictiveSearch.isOpen) return;
 
       if (scrollTop > this.currentScrollTop && scrollTop > this.headerBounds.bottom) {
@@ -398,7 +528,6 @@
       if (this.headerIsAlwaysSticky) return;
       this.header.classList.add('shopify-section-header-hidden', 'shopify-section-header-sticky');
       this.closeMenuDisclosure();
-      this.closeSearchModal();
     }
 
     reveal() {
@@ -425,6 +554,39 @@
 
   customElements.define('sticky-header', StickyHeader);
 {% endjavascript %}
+
+<script>
+  // Update wishlist bubble count from local storage
+  document.addEventListener('DOMContentLoaded', () => {
+    const updateHeaderWishlist = () => {
+      const wishlist = JSON.parse(localStorage.getItem('vivikta_wishlist')) || [];
+      const bubble = document.querySelector('.wishlist-count-bubble');
+      if (bubble) {
+        if (wishlist.length > 0) {
+          bubble.textContent = wishlist.length;
+          bubble.classList.remove('hidden');
+        } else {
+          bubble.classList.add('hidden');
+        }
+      }
+    };
+
+    updateHeaderWishlist();
+
+    // Re-verify on clicks or custom triggers
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.luxury-product-card__wishlist')) {
+        setTimeout(updateHeaderWishlist, 100);
+      }
+    });
+
+    // Make transparent background active instantly if scrolled initially
+    const headerWrapper = document.querySelector('.header-wrapper');
+    if (headerWrapper && window.scrollY > 50) {
+      headerWrapper.classList.add('is-sticky');
+    }
+  });
+</script>
 
 <script type="application/ld+json">
   {
@@ -470,7 +632,7 @@
 {
   "name": "t:sections.header.name",
   "class": "section-header",
-  "max_blocks": 3,
+  "max_blocks": 10,
   "settings": [
     {
       "type": "select",
@@ -565,6 +727,13 @@
     },
     {
       "type": "checkbox",
+      "id": "enable_transparent_header",
+      "default": true,
+      "label": "Enable Transparent Header Overlay",
+      "info": "Absolute-positions header over the top section of the homepage with white text."
+    },
+    {
+      "type": "checkbox",
       "id": "show_line_separator",
       "default": true,
       "label": "t:sections.header.settings.show_line_separator.label"
@@ -652,6 +821,66 @@
   "blocks": [
     {
       "type": "@app"
+    },
+    {
+      "type": "mega_menu_image",
+      "name": "Mega Menu Featured Images",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_trigger",
+          "label": "Menu Item Title Trigger",
+          "info": "Enter the exact menu link text that triggers this mega menu (e.g. 'Shop')."
+        },
+        {
+          "type": "header",
+          "content": "Featured Collection 1"
+        },
+        {
+          "type": "collection",
+          "id": "collection_1",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Image Override"
+        },
+        {
+          "type": "text",
+          "id": "title_1",
+          "label": "Title Override"
+        },
+        {
+          "type": "url",
+          "id": "link_1",
+          "label": "Link Override"
+        },
+        {
+          "type": "header",
+          "content": "Featured Collection 2"
+        },
+        {
+          "type": "collection",
+          "id": "collection_2",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image Override"
+        },
+        {
+          "type": "text",
+          "id": "title_2",
+          "label": "Title Override"
+        },
+        {
+          "type": "url",
+          "id": "link_2",
+          "label": "Link Override"
+        }
+      ]
     }
   ]
 }
