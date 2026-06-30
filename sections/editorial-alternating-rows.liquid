@@ -1,0 +1,661 @@
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap');
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  #EditorialRows-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    --text-color: {{ section.settings.text_color }};
+    --accent-color: {{ section.settings.accent_color }};
+    --column-gap: {{ section.settings.column_gap }}px;
+    --row-gap: {{ section.settings.row_gap }}px;
+    --content-max-width: {{ section.settings.content_max_width }}px;
+    
+    --label-size: {{ section.settings.label_size }}px;
+    --heading-size-desktop: {{ section.settings.heading_size_desktop }}px;
+    --heading-size-mobile: {{ section.settings.heading_size_mobile }}px;
+    --text-size: {{ section.settings.text_size }}px;
+    --signature-size: {{ section.settings.signature_size }}px;
+  }
+
+  .editorial-rows {
+    width: 100%;
+    box-sizing: border-box;
+    color: var(--text-color);
+  }
+
+  .editorial-rows__container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--row-gap);
+  }
+
+  /* Row Base */
+  .editorial-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--column-gap);
+    align-items: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .editorial-row {
+      flex-direction: row;
+    }
+
+    .editorial-row__column {
+      flex: 1;
+      width: 50%;
+    }
+
+    /* Auto-alternate columns: even blocks reverse direction */
+    .editorial-row:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+  }
+
+  /* Mobile Layout stack order */
+  @media screen and (max-width: 749px) {
+    .editorial-rows--mobile-image-first .editorial-row {
+      flex-direction: column-reverse; /* image is normally rendered second in markup, so reverse it to put it first */
+    }
+  }
+
+  /* Image Column */
+  .editorial-row__image-wrapper {
+    width: 100%;
+    overflow: hidden;
+    border-radius: {{ section.settings.image_border_radius }}px;
+    position: relative;
+  }
+
+  .editorial-row__image-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+    
+    /* Crop reveal starting state */
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .editorial-row.is-visible .editorial-row__image-container {
+    clip-path: inset(0 0 0 0);
+  }
+
+  .editorial-row__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  {% if section.settings.image_zoom_hover %}
+    .editorial-row__image-wrapper:hover .editorial-row__image {
+      transform: scale(1.06);
+    }
+  {% endif %}
+
+  /* Image Aspect Ratios */
+  .editorial-row__image-container--square {
+    aspect-ratio: 1/1;
+  }
+  .editorial-row__image-container--portrait {
+    aspect-ratio: 2/3;
+  }
+  .editorial-row__image-container--landscape {
+    aspect-ratio: 4/3;
+  }
+  .editorial-row__image-container--adapt {
+    aspect-ratio: var(--aspect-ratio, 16/9);
+  }
+
+  /* Text Column */
+  .editorial-row__content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+  }
+
+  @media screen and (min-width: 750px) {
+    .editorial-row__content-wrapper {
+      padding: 0 5%;
+    }
+  }
+
+  .editorial-row__content {
+    max-width: var(--content-max-width);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Text alignments */
+  .editorial-rows--align-left .editorial-row__content {
+    text-align: left;
+    margin-left: 0;
+  }
+  .editorial-rows--align-center .editorial-row__content {
+    text-align: center;
+  }
+  .editorial-rows--align-right .editorial-row__content {
+    text-align: right;
+    margin-right: 0;
+  }
+
+  /* Text fade-in slide-up triggers */
+  .editorial-row__label,
+  .editorial-row__heading,
+  .editorial-row__text,
+  .editorial-row__signature,
+  .editorial-row__cta {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .editorial-row.is-visible .editorial-row__label {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.1s;
+  }
+  .editorial-row.is-visible .editorial-row__heading {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.2s;
+  }
+  .editorial-row.is-visible .editorial-row__text {
+    opacity: 0.85;
+    transform: translateY(0);
+    transition-delay: 0.35s;
+  }
+  .editorial-row.is-visible .editorial-row__signature {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.45s;
+  }
+  .editorial-row.is-visible .editorial-row__cta {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.55s;
+  }
+
+  /* Typography sizes */
+  .editorial-row__label {
+    font-size: var(--label-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+  }
+
+  .editorial-row__heading {
+    font-size: var(--heading-size-mobile);
+    font-weight: 300;
+    line-height: 1.25;
+    margin: 0 0 20px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .editorial-row__heading {
+      font-size: var(--heading-size-desktop);
+    }
+  }
+
+  .editorial-row__text {
+    font-size: var(--text-size);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 25px;
+  }
+
+  .editorial-row__text p {
+    margin: 0 0 15px 0;
+  }
+  .editorial-row__text p:last-child {
+    margin: 0;
+  }
+
+  /* Cursive brand signature font */
+  .editorial-row__signature {
+    font-family: 'Alex Brush', cursive;
+    font-size: var(--signature-size);
+    color: var(--accent-color);
+    margin-bottom: 25px;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1;
+  }
+
+  /* Buttons */
+  .editorial-row-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 40px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--text-color);
+    background-color: var(--text-color);
+    color: var(--bg-color, #ffffff);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+
+  .editorial-row-btn:hover {
+    background-color: transparent;
+    color: var(--text-color);
+    transform: translateY(-2px);
+  }
+{%- endstyle -%}
+
+<editorial-rows id="EditorialRows-{{ section.id }}" data-section-id="{{ section.id }}" class="editorial-rows editorial-rows--{{ section.settings.content_alignment }} editorial-rows--mobile-{{ section.settings.mobile_layout }} section-{{ section.id }}-padding">
+  <div class="page-width">
+    
+    <div class="editorial-rows__container">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign product_image = block.settings.image
+          assign aspect_ratio = 1.0
+          if product_image != blank
+            assign aspect_ratio = product_image.aspect_ratio
+          endif
+        -%}
+        
+        <div class="editorial-row" data-block-id="{{ block.id }}" {{ block.shopify_attributes }}>
+          
+          {%- comment -%} Text Column (Rendered first in HTML so it stacks first on mobile if selected) {%- endcomment -%}
+          <div class="editorial-row__column editorial-row__column--text">
+            <div class="editorial-row__content-wrapper">
+              <div class="editorial-row__content">
+                
+                {%- if block.settings.label != blank -%}
+                  <div class="editorial-row__label">{{ block.settings.label }}</div>
+                {%- endif -%}
+
+                {%- if block.settings.heading != blank -%}
+                  <h3 class="editorial-row__heading">{{ block.settings.heading }}</h3>
+                {%- endif -%}
+
+                {%- if block.settings.description != blank -%}
+                  <div class="editorial-row__text rte">
+                    {{ block.settings.description }}
+                  </div>
+                {%- endif -%}
+
+                {%- if block.settings.signature != blank -%}
+                  <div class="editorial-row__signature">{{ block.settings.signature }}</div>
+                {%- endif -%}
+
+                {%- if block.settings.cta_label != blank -%}
+                  <div class="editorial-row__cta">
+                    <a href="{{ block.settings.cta_link | default: '#' }}" class="editorial-row-btn" {% if block.settings.cta_link == blank %}aria-disabled="true"{% endif %}>
+                      <span>{{ block.settings.cta_label }}</span>
+                    </a>
+                  </div>
+                {%- endif -%}
+
+              </div>
+            </div>
+          </div>
+
+          {%- comment -%} Image Column {%- endcomment -%}
+          <div class="editorial-row__column editorial-row__column--image">
+            <div class="editorial-row__image-wrapper">
+              <div class="editorial-row__image-container editorial-row__image-container--{{ section.settings.image_aspect_ratio }}" style="--aspect-ratio: {{ aspect_ratio }};">
+                {%- if product_image != blank -%}
+                  {{ product_image | image_url: width: 1200 | image_tag: 
+                    loading: 'lazy', 
+                    class: 'editorial-row__image', 
+                    widths: '375, 550, 750, 990, 1200', 
+                    alt: block.settings.heading 
+                  }}
+                {%- else -%}
+                  {%- assign placeholder_index = forloop.index0 | modulo: 3 | plus: 1 -%}
+                  {{ 'lifestyle-' | append: placeholder_index | placeholder_svg_tag: 'editorial-row__image placeholder-svg' }}
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</editorial-rows>
+
+<script>
+  if (!customElements.get('editorial-rows')) {
+    customElements.define('editorial-rows', class EditorialRows extends HTMLElement {
+      constructor() {
+        super();
+        this.observer = null;
+        this.rows = [];
+      }
+
+      connectedCallback() {
+        this.rows = Array.from(this.querySelectorAll('.editorial-row'));
+        this.initObserver();
+
+        this.sectionLoadHandler = (event) => {
+          if (event.detail.sectionId === this.dataset.sectionId) {
+            this.resetAnimation();
+            setTimeout(() => this.triggerAnimation(), 50);
+          }
+        };
+        document.addEventListener('shopify:section:load', this.sectionLoadHandler);
+      }
+
+      disconnectedCallback() {
+        if (this.observer) this.observer.disconnect();
+        document.removeEventListener('shopify:section:load', this.sectionLoadHandler);
+      }
+
+      initObserver() {
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const row = entry.target;
+              row.classList.add('is-visible');
+              this.observer.unobserve(row);
+            }
+          });
+        }, {
+          rootMargin: '0px 0px -10% 0px',
+          threshold: 0.1
+        });
+
+        this.rows.forEach(row => this.observer.observe(row));
+      }
+
+      resetAnimation() {
+        this.rows.forEach(row => row.classList.remove('is-visible'));
+      }
+
+      triggerAnimation() {
+        this.rows.forEach(row => row.classList.add('is-visible'));
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Editorial Alternating Rows",
+  "tag": "section",
+  "class": "section section-editorial-alternating-rows",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image Configuration"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image Aspect Ratio",
+      "options": [
+        { "value": "adapt", "label": "Adapt to Image File" },
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (2:3)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "checkbox",
+      "id": "image_zoom_hover",
+      "label": "Enable Image Zoom on Hover",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Corner Radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Layout Alignments"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Text Column Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobile Stacking Order",
+      "options": [
+        { "value": "image-first", "label": "Image on Top" },
+        { "value": "text-first", "label": "Text on Top" }
+      ],
+      "default": "image-first"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 400,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "label": "Content Box Max Width",
+      "default": 550
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "min": 20,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Spacing Between Columns (Desktop)",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "min": 40,
+      "max": 160,
+      "step": 5,
+      "unit": "px",
+      "label": "Spacing Between Rows",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Color Customizer"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color (Labels / Signatures)",
+      "default": "#9d8461"
+    },
+    {
+      "type": "header",
+      "content": "Typography Sizing"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Label size",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size (Desktop)",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 20,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size (Mobile)",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Body text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "signature_size",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Signature Cursive size",
+      "default": 42
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "editorial_row",
+      "name": "Editorial Row Block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Row Image"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Row Small Label",
+          "default": "Capsule Collection"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "heading",
+          "label": "Row Heading",
+          "default": "Modernist Aesthetic"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Row Description",
+          "default": "<p>A curated release of high-contrast silhouettes and hand-tailored materials crafted for pure functionality and aesthetic command.</p>"
+        },
+        {
+          "type": "text",
+          "id": "signature",
+          "label": "Cursive Signature Text",
+          "default": "Ashish Sharma"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA Button Label",
+          "default": "Shop the Release"
+        },
+        {
+          "type": "url",
+          "id": "cta_link",
+          "label": "CTA Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial Alternating Rows",
+      "blocks": [
+        { "type": "editorial_row" },
+        { "type": "editorial_row", "settings": { "label": "Heritage Story", "heading": "Global Craftsmanship", "signature": "Vivikta Design" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
