@@ -482,7 +482,8 @@
             
             {%- comment -%} Prepend Clones {%- endcomment -%}
             {%- if should_loop -%}
-              {%- for product in products limit: limit offset: total_products | minus: clones_count -%}
+              {%- assign clones_offset = total_products | minus: clones_count -%}
+              {%- for product in products limit: limit offset: clones_offset -%}
                 <div class="new-arrivals-slider__slide cloned">
                   {% render 'luxury-product-card-item', product: product, section: section %}
                 </div>

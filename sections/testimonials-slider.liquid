@@ -364,7 +364,8 @@
             
             {%- comment -%} Prepend Clones {%- endcomment -%}
             {%- if should_loop -%}
-              {%- for block in section.blocks limit: clones_count offset: total_blocks | minus: clones_count -%}
+              {%- assign clones_offset = total_blocks | minus: clones_count -%}
+              {%- for block in section.blocks limit: clones_count offset: clones_offset -%}
                 <div class="testimonials__slide cloned">
                   {% render 'testimonial-card-item', block: block %}
                 </div>
