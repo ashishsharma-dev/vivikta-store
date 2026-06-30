@@ -1,0 +1,393 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  #TrustIcons-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    --text-color: {{ section.settings.text_color }};
+    --accent-color: {{ section.settings.accent_color }};
+    --column-gap: {{ section.settings.column_gap }}px;
+    
+    --icon-size-desktop: {{ section.settings.icon_size_desktop }}px;
+    --icon-size-mobile: {{ section.settings.icon_size_mobile }}px;
+  }
+
+  .trust-icons {
+    width: 100%;
+    box-sizing: border-box;
+    color: var(--text-color);
+  }
+
+  .trust-icons__header {
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .trust-icons__heading {
+    margin: 0;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Grid Layout */
+  .trust-icons__grid {
+    display: grid;
+    gap: var(--column-gap);
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  @media screen and (min-width: 750px) {
+    .trust-icons__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .trust-icons__grid {
+      grid-template-columns: repeat({{ section.settings.columns_desktop }}, minmax(0, 1fr));
+    }
+  }
+
+  /* Card Item Styling */
+  .trust-icons__card {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .trust-icons--align-center .trust-icons__card {
+    align-items: center;
+    text-align: center;
+  }
+
+  .trust-icons--align-left .trust-icons__card {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  /* Hover Lift Animation */
+  {% if section.settings.enable_hover_lift %}
+    .trust-icons__card:hover {
+      transform: translateY(-5px);
+    }
+  {% endif %}
+
+  /* Icon Wrapper */
+  .trust-icons__icon-wrapper {
+    width: var(--icon-size-mobile);
+    height: var(--icon-size-mobile);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media screen and (min-width: 750px) {
+    .trust-icons__icon-wrapper {
+      width: var(--icon-size-desktop);
+      height: var(--icon-size-desktop);
+    }
+  }
+
+  .trust-icons__card:hover .trust-icons__icon-wrapper {
+    transform: scale(1.1) rotate(2deg);
+  }
+
+  /* Raw SVG styling to inherit customizer color dynamically */
+  .trust-icons__icon-wrapper svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .trust-icons__icon-wrapper svg path,
+  .trust-icons__icon-wrapper svg circle,
+  .trust-icons__icon-wrapper svg rect,
+  .trust-icons__icon-wrapper svg polygon {
+    stroke: currentColor;
+    fill: currentColor;
+  }
+
+  /* Image Fallback icon */
+  .trust-icons__image-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Text Elements */
+  .trust-icons__title {
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0 0 10px 0;
+  }
+
+  .trust-icons__text {
+    font-size: 13px;
+    line-height: 1.6;
+    font-weight: 300;
+    margin: 0;
+    opacity: 0.85;
+  }
+
+  /* Mobile Swipe Slider Carousel (CSS scroll snap) */
+  @media screen and (max-width: 749px) {
+    {% if section.settings.slider_mobile %}
+      .trust-icons__grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none; /* Hide standard Firefox scrollbar */
+        margin: 0 -20px; /* Bleed out edges */
+        padding: 10px 20px;
+        gap: 20px;
+      }
+
+      .trust-icons__grid::-webkit-scrollbar {
+        display: none; /* Hide Chrome/Safari scrollbar */
+      }
+
+      .trust-icons__card {
+        flex: 0 0 75%; /* Visible card overflow width peek */
+        scroll-snap-align: center;
+      }
+    {% endif %}
+  }
+{%- endstyle -%}
+
+<div id="TrustIcons-{{ section.id }}" class="trust-icons trust-icons--align-{{ section.settings.content_alignment }} section-{{ section.id }}-padding">
+  <div class="page-width">
+    
+    {%- if section.settings.heading != blank -%}
+      <div class="trust-icons__header">
+        <h2 class="trust-icons__heading">{{ section.settings.heading }}</h2>
+      </div>
+    {%- endif -%}
+
+    <div class="trust-icons__grid">
+      {%- for block in section.blocks -%}
+        <div class="trust-icons__card" {{ block.shopify_attributes }}>
+          
+          {%- comment -%} Icon Box {%- endcomment -%}
+          <div class="trust-icons__icon-wrapper">
+            {%- if block.settings.icon_svg != blank -%}
+              {{ block.settings.icon_svg }}
+            {%- elsif block.settings.icon_image != blank -%}
+              {{ block.settings.icon_image | image_url: width: 150 | image_tag: loading: 'lazy', class: 'trust-icons__image-icon', alt: block.settings.heading }}
+            {%- else -%}
+              {%- comment -%} Premium Star fallback SVG icon {%- endcomment -%}
+              <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            {%- endif -%}
+          </div>
+
+          {%- comment -%} Text Box {%- endcomment -%}
+          {%- if block.settings.heading != blank -%}
+            <h3 class="trust-icons__title">{{ block.settings.heading }}</h3>
+          {%- endif -%}
+          
+          {%- if block.settings.description != blank -%}
+            <p class="trust-icons__text">{{ block.settings.description }}</p>
+          {%- endif -%}
+
+        </div>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Trust Badges",
+  "tag": "section",
+  "class": "section section-trust-icons",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Commitments"
+    },
+    {
+      "type": "header",
+      "content": "Desktop & Mobile Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 3,
+      "max": 6,
+      "step": 1,
+      "label": "Columns On Desktop",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content Box Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "slider_mobile",
+      "label": "Enable Horizontal Swipe Slider on Mobile",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Spacing Between Columns (Desktop)",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Icons Customization"
+    },
+    {
+      "type": "range",
+      "id": "icon_size_desktop",
+      "min": 24,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "label": "Icon size (Desktop)",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "icon_size_mobile",
+      "min": 20,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Icon size (Mobile)",
+      "default": 36
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_lift",
+      "label": "Enable Subtle Lift on Hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors Customizer"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#fcfbfa"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Icon Accent Color",
+      "default": "#9d8461"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust_badge",
+      "name": "Trust Badge Item",
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": "Raw SVG XML Code",
+          "info": "Paste a raw SVG tag here (highly recommended to dynamically style paths with customized brand colors)."
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Or Image / PNG Icon (Fallback)"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Badge Heading",
+          "default": "Free Shipping"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Badge Description",
+          "default": "Complimentary express delivery on all orders above $150."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust Badges",
+      "blocks": [
+        { "type": "trust_badge", "settings": { "heading": "Free Delivery", "description": "Complimentary global shipping on all order curations." } },
+        { "type": "trust_badge", "settings": { "heading": "Secure Checkout", "description": "Fully protected online payments via secure SSL portals." } },
+        { "type": "trust_badge", "settings": { "heading": "Premium Quality", "description": "Finest tailored fabrics and hand-crafted attention." } },
+        { "type": "trust_badge", "settings": { "heading": "Easy Returns", "description": "Hassle-free exchanges within 14 calendar days." } }
+      ]
+    }
+  ]
+}
+{% endschema %}
