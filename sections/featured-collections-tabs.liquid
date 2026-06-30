@@ -1,0 +1,607 @@
+{%- liquid
+  assign limit = section.settings.products_to_show
+  
+  # Find initial collection
+  assign initial_collection = nil
+  for block in section.blocks
+    if block.settings.collection != blank
+      assign initial_collection = block.settings.collection
+      break
+    endif
+  endfor
+
+  # If section rendering request is active, we might have a query parameter for collection!
+  # But native section rendering API renders the section in the collection page context.
+  # So if collection is defined in context (e.g. on /collections/handle), liquid uses that collection!
+  assign active_collection = collection | default: initial_collection
+  assign products = active_collection.products
+  assign total_products = products.size | at_most: limit
+-%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  #FeaturedCollections-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    --card-gap: {{ section.settings.card_gap }}px;
+    --text-color: {{ section.settings.text_color }};
+  }
+
+  .featured-collection {
+    width: 100%;
+    box-sizing: border-box;
+    color: var(--text-color);
+  }
+
+  .featured-collection__header {
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .featured-collection__heading {
+    margin: 0 0 20px 0;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Tabs Navigation */
+  .featured-collection__tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 12px;
+  }
+
+  .featured-collection__tab-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.5;
+    position: relative;
+    transition: opacity 0.3s, color 0.3s;
+  }
+
+  .featured-collection__tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -13px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--text-color);
+    transform: scaleX(0);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .featured-collection__tab-btn:hover {
+    opacity: 0.8;
+  }
+
+  .featured-collection__tab-btn.is-active {
+    opacity: 1;
+  }
+
+  .featured-collection__tab-btn.is-active::after {
+    transform: scaleX(1);
+  }
+
+  /* Grid Layout (4-2-2) */
+  .featured-collection__grid {
+    display: grid;
+    gap: var(--card-gap);
+    grid-template-columns: repeat(2, 1fr); /* Mobile: 2 cols */
+  }
+
+  @media screen and (min-width: 750px) {
+    .featured-collection__grid {
+      grid-template-columns: repeat(2, 1fr); /* Tablet: 2 cols */
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .featured-collection__grid {
+      grid-template-columns: repeat(4, 1fr); /* Desktop: 4 cols */
+    }
+  }
+
+  /* Shimmer Skeleton styling */
+  .featured-collection__skeleton {
+    display: none; /* hidden template */
+  }
+
+  .skeleton-card {
+    background-color: var(--card-bg, #ffffff);
+    border-radius: {{ section.settings.card_border_radius }}px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    aspect-ratio: 3/4;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .skeleton-card__media {
+    width: 100%;
+    height: 70%;
+    background-color: #f0f0f0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-card__info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+  }
+
+  .skeleton-card__bar {
+    height: 12px;
+    background-color: #f0f0f0;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-card__bar--title {
+    width: 75%;
+    height: 14px;
+  }
+
+  .skeleton-card__bar--price {
+    width: 40%;
+    margin-top: auto;
+  }
+
+  /* Shimmer sweep effect */
+  .skeleton-card__media::after,
+  .skeleton-card__bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+    animation: luxury-shimmer 1.6s infinite;
+    transform: translateX(-100%);
+  }
+
+  @keyframes luxury-shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Fade out/in transition for AJAX grid */
+  .featured-collection__grid-wrapper {
+    transition: opacity 0.3s ease;
+    width: 100%;
+  }
+
+  .featured-collection__grid-wrapper.is-loading {
+    opacity: 0.5;
+  }
+{%- endstyle -%}
+
+<featured-collections-tabs id="FeaturedCollections-{{ section.id }}" data-section-id="{{ section.id }}" class="featured-collection section-{{ section.id }}-padding">
+  <div class="page-width">
+    
+    <div class="featured-collection__header">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="featured-collection__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+
+      {%- comment -%} Tab Headers {%- endcomment -%}
+      <div class="featured-collection__tabs">
+        {%- assign first_tab = true -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.collection != blank -%}
+            <button 
+              class="featured-collection__tab-btn{% if first_tab %} is-active{% endif %}" 
+              data-collection-handle="{{ block.settings.collection.handle }}" 
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.collection.title }}
+            </button>
+            {%- assign first_tab = false -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} Grid Products Wrapper {%- endcomment -%}
+    <div class="featured-collection__grid-wrapper">
+      <div class="featured-collection__grid" data-active-handle="{{ active_collection.handle }}">
+        
+        {%- if active_collection != blank and total_products > 0 -%}
+          {%- for product in products limit: limit -%}
+            {% render 'luxury-product-card-item', product: product %}
+          {%- endfor -%}
+        {%- else -%}
+          {%- comment -%} Placeholders if empty {%- endcomment -%}
+          {%- for i in (1..8) -%}
+            <div class="luxury-product-card">
+              <div class="luxury-product-card__media-wrapper">
+                {{ 'product-' | append: i | placeholder_svg_tag: 'luxury-product-card__image placeholder-svg' }}
+              </div>
+              <div class="luxury-product-card__info">
+                <div class="luxury-product-card__vendor">Vendor</div>
+                <h3 class="luxury-product-card__title">
+                  <a role="link" aria-disabled="true">Featured Product {{ i }}</a>
+                </h3>
+                <div class="luxury-product-card__price">
+                  <span class="luxury-price__current">$79.00</span>
+                </div>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+
+      </div>
+    </div>
+
+    {%- comment -%} Hidden Skeleton template for AJAX loader {%- endcomment -%}
+    <div class="featured-collection__skeleton">
+      {%- for i in (1..limit) -%}
+        <div class="skeleton-card">
+          <div class="skeleton-card__media"></div>
+          <div class="skeleton-card__info">
+            <div class="skeleton-card__bar skeleton-card__bar--title"></div>
+            <div class="skeleton-card__bar"></div>
+            <div class="skeleton-card__bar skeleton-card__bar--price"></div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</featured-collections-tabs>
+
+<script>
+  if (!customElements.get('featured-collections-tabs')) {
+    customElements.define('featured-collections-tabs', class FeaturedCollectionsTabs extends HTMLElement {
+      constructor() {
+        super();
+        this.sectionId = this.dataset.sectionId;
+        this.gridWrapper = this.querySelector('.featured-collection__grid-wrapper');
+        this.skeletonHTML = this.querySelector('.featured-collection__skeleton').innerHTML;
+        this.cache = {};
+      }
+
+      connectedCallback() {
+        const tabs = this.querySelectorAll('.featured-collection__tab-btn');
+        tabs.forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.switchCollection(tab);
+          });
+        });
+      }
+
+      switchCollection(clickedTab) {
+        // Toggle Active Tab Button
+        this.querySelectorAll('.featured-collection__tab-btn').forEach(btn => btn.classList.remove('is-active'));
+        clickedTab.classList.add('is-active');
+
+        const handle = clickedTab.dataset.collectionHandle;
+        if (!handle) return;
+
+        // Display Skeleton Skeletons Instantly
+        this.gridWrapper.classList.add('is-loading');
+        this.gridWrapper.innerHTML = `<div class="featured-collection__grid">${this.skeletonHTML}</div>`;
+
+        // Check cache
+        if (this.cache[handle]) {
+          setTimeout(() => {
+            this.renderGrid(this.cache[handle]);
+          }, 300); // Tiny timeout for shimmer skeleton appreciation
+          return;
+        }
+
+        // Fetch using Shopify Section Rendering API
+        // This parses the section on `/collections/[handle]` and fetches the server Liquid output!
+        const fetchUrl = `/collections/${handle}?section_id=${this.sectionId}`;
+
+        fetch(fetchUrl)
+          .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            return response.text();
+          })
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const gridHTML = doc.querySelector('.featured-collection__grid-wrapper').innerHTML;
+            
+            // Save cache
+            this.cache[handle] = gridHTML;
+            
+            this.renderGrid(gridHTML);
+          })
+          .catch(error => {
+            console.error('Error fetching collection tabs:', error);
+            this.gridWrapper.classList.remove('is-loading');
+          });
+      }
+
+      renderGrid(gridHTML) {
+        this.gridWrapper.innerHTML = gridHTML;
+        this.gridWrapper.classList.remove('is-loading');
+
+        // Rebind Variant Option swatches, wishlist localstorage, and Quick Add AJAX form bindings
+        this.rebindCardActions();
+      }
+
+      rebindCardActions() {
+        // Find if new-arrivals-slider custom element exists to borrow card script handlers,
+        // or execute standard custom elements helpers directly.
+        
+        // 1. Swatches
+        this.querySelectorAll('.luxury-swatch').forEach(swatch => {
+          swatch.addEventListener('click', (e) => {
+            e.preventDefault();
+            const card = swatch.closest('.luxury-product-card');
+            if (!card) return;
+
+            swatch.parentElement.querySelectorAll('.luxury-swatch').forEach(s => s.classList.remove('is-active'));
+            swatch.classList.add('is-active');
+
+            const variantImgSrc = swatch.dataset.variantImage;
+            const primaryImg = card.querySelector('.luxury-product-card__image--primary');
+            if (variantImgSrc && primaryImg) {
+              primaryImg.src = variantImgSrc;
+              primaryImg.srcset = '';
+            }
+
+            const priceCurrent = card.querySelector('.luxury-price__current');
+            const priceCompare = card.querySelector('.luxury-price__compare');
+            if (priceCurrent && swatch.dataset.variantPrice) {
+              priceCurrent.textContent = swatch.dataset.variantPrice;
+            }
+            if (priceCompare) {
+              if (swatch.dataset.variantComparePrice) {
+                priceCompare.textContent = swatch.dataset.variantComparePrice;
+                priceCompare.classList.remove('hidden');
+              } else {
+                priceCompare.classList.add('hidden');
+              }
+            }
+
+            const quickAddBtn = card.querySelector('.luxury-quick-add-btn');
+            if (quickAddBtn && swatch.dataset.variantId) {
+              quickAddBtn.dataset.variantId = swatch.dataset.variantId;
+            }
+            card.dataset.variantId = swatch.dataset.variantId;
+          });
+        });
+
+        // 2. Wishlist
+        const WISHLIST_KEY = 'vivikta_wishlist';
+        let wishlist = JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
+        this.querySelectorAll('.luxury-product-card__wishlist').forEach(btn => {
+          const handle = btn.dataset.productHandle;
+          if (wishlist.includes(handle)) {
+            btn.classList.add('is-active');
+          }
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            wishlist = JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
+            if (wishlist.includes(handle)) {
+              wishlist = wishlist.filter(h => h !== handle);
+              btn.classList.remove('is-active');
+            } else {
+              wishlist.push(handle);
+              btn.classList.add('is-active');
+            }
+            localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
+          });
+        });
+
+        // 3. Quick Add AJAX
+        this.querySelectorAll('.luxury-quick-add-btn').forEach(btn => {
+          if (btn.classList.contains('luxury-quick-add-btn--select')) {
+            btn.addEventListener('click', () => {
+              window.location.href = btn.dataset.productUrl;
+            });
+            return;
+          }
+
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const variantId = btn.dataset.variantId;
+            const spinner = btn.querySelector('.luxury-spinner');
+            const label = btn.querySelector('span');
+
+            if (!variantId) return;
+
+            if (spinner) spinner.classList.remove('hidden');
+            if (label) label.textContent = 'Adding...';
+            btn.disabled = true;
+
+            fetch('/cart/add.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
+            })
+            .then(response => {
+              if (!response.ok) throw new Error('Failed to add');
+              return response.json();
+            })
+            .then(data => {
+              document.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart: data } }));
+              const cartDrawer = document.querySelector('cart-drawer');
+              if (cartDrawer && typeof cartDrawer.renderContents === 'function') {
+                cartDrawer.renderContents(data);
+              } else {
+                const cartNotification = document.querySelector('cart-notification');
+                if (cartNotification && typeof cartNotification.renderContents === 'function') {
+                  cartNotification.renderContents(data);
+                } else {
+                  fetch('/cart.js')
+                    .then(res => res.json())
+                    .then(cart => {
+                      const bubbles = document.querySelectorAll('.cart-count-bubble span:first-child');
+                      bubbles.forEach(b => b.textContent = cart.item_count);
+                      const wrappers = document.querySelectorAll('.cart-count-bubble');
+                      wrappers.forEach(w => w.classList.remove('hidden'));
+                    });
+                }
+              }
+              if (label) label.textContent = 'Added!';
+              setTimeout(() => {
+                if (label) label.textContent = 'Quick Add';
+                btn.disabled = false;
+              }, 2000);
+            })
+            .catch(error => {
+              console.error(error);
+              if (label) label.textContent = 'Error';
+              setTimeout(() => {
+                if (label) label.textContent = 'Quick Add';
+                btn.disabled = false;
+              }, 2000);
+            })
+            .finally(() => {
+              if (spinner) spinner.classList.add('hidden');
+            });
+          });
+        });
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Featured Collection Tabs",
+  "tag": "section",
+  "class": "section section-featured-collections-tabs",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop Our Curations"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 4,
+      "max": 12,
+      "step": 4,
+      "label": "Maximum Products to Show (Per Tab)",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Styling & Layout"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#121212"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Spacing (Gap)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Border Radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection_tab",
+      "name": "Collection Tab",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection Tabs",
+      "blocks": [
+        { "type": "collection_tab" },
+        { "type": "collection_tab" }
+      ]
+    }
+  ]
+}
+{% endschema %}
