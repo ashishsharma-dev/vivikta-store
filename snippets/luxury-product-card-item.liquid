@@ -1,0 +1,138 @@
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign on_sale = false
+  if product.compare_at_price > product.price
+    assign on_sale = true
+  endif
+  
+  # Check if product is new
+  assign is_new = false
+  for tag in product.tags
+    assign tag_down = tag | downcase
+    if tag_down == 'new'
+      assign is_new = true
+    endif
+  endfor
+-%}
+
+<div class="luxury-product-card" data-product-id="{{ product.id }}" data-variant-id="{{ current_variant.id }}">
+  <div class="luxury-product-card__media-wrapper">
+    
+    {%- comment -%} Badges {%- endcomment -%}
+    <div class="luxury-product-card__badges">
+      {%- if on_sale -%}
+        <span class="luxury-badge luxury-badge--sale">
+          {%- liquid
+            assign savings = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round
+          -%}
+          -{{ savings }}%
+        </span>
+      {%- endif -%}
+      {%- if is_new -%}
+        <span class="luxury-badge luxury-badge--new">New</span>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Wishlist Icon {%- endcomment -%}
+    <button class="luxury-product-card__wishlist" aria-label="Add to wishlist" data-product-handle="{{ product.handle }}">
+      <svg viewBox="0 0 24 24" class="icon icon-heart">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+    </button>
+
+    {%- comment -%} Product Images {%- endcomment -%}
+    <a href="{{ product.url }}" class="luxury-product-card__image-link">
+      <div class="luxury-product-card__image-container">
+        {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', class: 'luxury-product-card__image luxury-product-card__image--primary', alt: product.title }}
+        
+        {%- if product.media[1] != blank -%}
+          {{ product.media[1] | image_url: width: 600 | image_tag: loading: 'lazy', class: 'luxury-product-card__image luxury-product-card__image--secondary', alt: product.title }}
+        {%- endif -%}
+      </div>
+    </a>
+
+    {%- comment -%} Quick Add CTA overlay {%- endcomment -%}
+    <div class="luxury-product-card__quick-add-wrapper">
+      {%- if product.variants.size == 1 -%}
+        <button class="luxury-quick-add-btn" data-variant-id="{{ current_variant.id }}" {% unless current_variant.available %}disabled{% endunless %}>
+          <span>{% if current_variant.available %}Quick Add{% else %}Sold Out{% endif %}</span>
+          <div class="luxury-spinner hidden"></div>
+        </button>
+      {%- else -%}
+        <button class="luxury-quick-add-btn luxury-quick-add-btn--select" data-product-url="{{ product.url }}">
+          <span>Select Options</span>
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="luxury-product-card__info">
+    <div class="luxury-product-card__vendor">{{ product.vendor }}</div>
+    <h3 class="luxury-product-card__title">
+      <a href="{{ product.url }}">{{ product.title }}</a>
+    </h3>
+
+    {%- comment -%} Product Rating {%- endcomment -%}
+    {%- if product.metafields.reviews.rating.value != blank -%}
+      {%- liquid
+        assign rating_decimal = 0
+        assign decimal = product.metafields.reviews.rating.value.rating | modulo: 1
+        if decimal >= 0.3 and decimal <= 0.7
+          assign rating_decimal = 0.5
+        elsif decimal > 0.7
+          assign rating_decimal = 1
+        endif
+      -%}
+      <div class="luxury-product-card__rating">
+        <span class="rating-star" style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }};"></span>
+        <span class="rating-text">({{ product.metafields.reviews.rating_count }})</span>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Price block {%- endcomment -%}
+    <div class="luxury-product-card__price">
+      <span class="luxury-price__current">{{ product.price | money }}</span>
+      {%- if on_sale -%}
+        <span class="luxury-price__compare">{{ product.compare_at_price | money }}</span>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Variant swatches (Color) {%- endcomment -%}
+    {%- for option in product.options_with_values -%}
+      {%- assign option_name = option.name | downcase -%}
+      {%- if option_name == 'color' or option_name == 'colour' -%}
+        <div class="luxury-product-card__swatches" data-option-index="{{ forloop.index0 }}">
+          {%- for value in option.values -%}
+            {%- liquid
+              # Find first variant with this color value to get variant ID and image URL
+              assign swatch_variant = nil
+              for variant in product.variants
+                if variant.options[forloop.parentloop.index0] == value
+                  assign swatch_variant = variant
+                  break
+                endif
+              endfor
+              
+              assign swatch_img = ""
+              if swatch_variant.featured_media != blank
+                assign swatch_img = swatch_variant.featured_media | image_url: width: 600
+              endif
+            -%}
+            <button 
+              class="luxury-swatch{% if option.selected_value == value %} is-active{% endif %}" 
+              data-value="{{ value | escape }}" 
+              data-variant-id="{{ swatch_variant.id }}"
+              data-variant-price="{{ swatch_variant.price | money }}"
+              data-variant-compare-price="{% if swatch_variant.compare_at_price > swatch_variant.price %}{{ swatch_variant.compare_at_price | money }}{% endif %}"
+              data-variant-image="{{ swatch_img }}"
+              style="background-color: {{ value | split: ' ' | last | downcase }};"
+              title="{{ value | escape }}"
+              aria-label="Select color {{ value | escape }}"
+            >
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
