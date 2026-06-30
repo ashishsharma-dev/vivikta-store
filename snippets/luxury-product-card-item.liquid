@@ -5,7 +5,9 @@
     assign on_sale = true
   endif
   
-  # Check if product is new
+  comment
+    Check if product is new
+  endcomment
   assign is_new = false
   for tag in product.tags
     assign tag_down = tag | downcase
@@ -104,7 +106,9 @@
         <div class="luxury-product-card__swatches" data-option-index="{{ forloop.index0 }}">
           {%- for value in option.values -%}
             {%- liquid
-              # Find first variant with this color value to get variant ID and image URL
+              comment
+                Find first variant with this color value to get variant ID and image URL
+              endcomment
               assign swatch_variant = nil
               for variant in product.variants
                 if variant.options[forloop.parentloop.index0] == value

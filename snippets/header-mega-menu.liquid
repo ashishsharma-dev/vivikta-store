@@ -27,7 +27,9 @@
               </summary>
               
               {%- liquid
-                # Find matching mega menu image block
+                comment
+                  Find matching mega menu image block
+                endcomment
                 assign featured_block = nil
                 assign link_title_downcase = link.title | downcase
                 for block in section.blocks
